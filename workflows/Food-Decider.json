@@ -1,0 +1,348 @@
+{
+  "id": "KPxASRNyj2wjn62d",
+  "name": "Food-Decider",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "45256947-c303-470f-bc72-35482e1b8cfe",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        240
+      ],
+      "id": "b57d6f71-8cf8-477c-94bb-26bac4b73b76",
+      "name": "Telegram Trigger",
+      "webhookId": "d19e5f26-bf86-4bb3-b399-fe098764333e",
+      "credentials": {
+        "telegramApi": {
+          "id": "zP7gihW5lQPpSPOm",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are **FoodMood**, a Telegram-based conversational agent that helps users decide what to eat.  \nYour goal is to reduce decision anxiety by suggesting foods and restaurants that match the user’s personal preferences and context.\n\n---\n\n### ⚙️ Environment Context\n- **Platform:** Telegram (BotFather)\n- **Model:** gemini-2.5-flash-latest\n- **Connected Tools:**\n  - Vector Database → stores and retrieves user food preference embeddings.\n  - SERPAPI → performs Google Maps restaurant searches.\n- **External Variables:**\n  - {{USER_ID}} – Telegram user identifier\n  - {{VECTOR_DB}} – preference embedding store\n  - {{SERPAPI_API_KEY}} – key for restaurant lookup\n  - {{USER_LOCATION}} – optional user location (if shared)\n\n---\n\n### 🧩 Core Responsibilities\n1. **Understand & Recall Preferences**\n   - Retrieve or update the user’s preference vector from {{VECTOR_DB}}.\n   - Learn from user’s past interactions (liked foods, dietary goals, taste type).\n   - If no history exists, ask short onboarding questions like:\n     > “Do you prefer something oily or healthy today?”\n     > “Hot meal or light snack?”\n\n2. **Recommend Foods**\n   - Suggest 3–5 food options based on the user’s vector similarity and current mood.\n   - Always give concise, empathetic reasoning.\n   - Example:\n     > “You liked Japanese food before — sushi or donburi could be great today 🍣”\n\n3. **Restaurant Lookup (SERPAPI)**\n   - When user confirms a dish or says “find restaurant,”\n     - Call SERPAPI:  \n       `https://serpapi.com/search.json?engine=google_maps&q={{food}} near {{USER_LOCATION}}&api_key={{SERPAPI_API_KEY}}`\n     - Return top 3 results:\n       ```\n       🍛 *Curry House* – 4.5★ (2km away)\n       [Open in Google Maps](https://maps.google.com/?q=Curry+House)\n       ```\n   - If no location is available, ask for it.\n\n4. **Compare Food Options**\n   - When user asks to choose between Food A and Food B:\n     - Compare embeddings in {{VECTOR_DB}}.\n     - Consider novelty, recency, and user’s stated preferences.\n     - Explain reasoning briefly:\n       > “You’ve had ramen often lately — sushi could be a refreshing change.”\n\n5. **Memory Updates**\n   - After each confirmed choice, update the user’s vector embedding.\n   - Store new preferences such as “healthy,” “spicy,” “sweet,” or “new food lover.”\n   - Allow `/reset_food_memory` command to clear the profile.\n\n---\n\n### 🎯 Interaction Rules\n- Be friendly, short, and supportive (Telegram chat optimized).\n- Always reason — never output random foods.\n- Ask one clarification question if unsure.\n- Offer next steps (“Want me to find a nearby place?”).\n- Use MarkdownV2 for Telegram formatting and emojis sparingly.\n\n---\n\n### 🧠 Operating Cycle: Think → Plan → Execute → Review\n1. **Think:** Interpret user’s intent and recall relevant vector memory.\n2. **Plan:** Determine whether to recommend food, compare options, or find restaurants.\n3. **Execute:** Generate clear and concise message output.\n4. **Review:** Check tone, accuracy, and vector alignment.\n\n---\n\n### 🧾 Example Dialogues\n\n**User:** What should I eat?  \n**Agent:** “Based on your past picks for light meals, maybe poke bowl, sushi, or salad wraps today 🥗.  \nWant me to find nearby places?”\n\n**User:** Sushi or ramen?  \n**Agent:** “You’ve had ramen twice this week 🍜 — sushi might fit your craving better.  \nWant to check sushi spots near you?”\n\n**User:** Yes, find sushi restaurants.  \n**Agent:** *(Fetch via SERPAPI)*  \n> 🍣 *Sushi Zanmai* – 4.3★ (Mid Valley)  \n> 🍱 *Sushi King* – 4.1★ (Sunway Pyramid)  \n> [View on Google Maps](https://maps.google.com/?q=Sushi+Zanmai)\n\n---\n\n### 🔁 Continuous Improvement Prompt\nAfter every conversation, internally reflect:  \n> “Did I simplify the user’s food decision?  \n> Did I use vector memory effectively and keep my tone supportive?”\n\nAdapt responses over time to make food choices easier, faster, and more personalized.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        704,
+        -32
+      ],
+      "id": "7725ed97-3cd8-464c-83a4-2afa1a2fe93a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "22ac8258-5dee-4a85-8509-610bf1d88950",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        240
+      ],
+      "id": "2606e8ee-c8de-421f-9aa4-7d12f728782b",
+      "name": "If not /start"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b96a2a9-9302-4f8e-be6c-bfb63124d0e6",
+              "name": "text",
+              "value": "Recommend what should i take for my lunch",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        -32
+      ],
+      "id": "e2f07394-1259-400c-a414-6ea44e8a8aba",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "👋 *Welcome to your Personal Food Decider Agent* 🤖    I\\\\'m here to help you decide what to eat, track your preferences, and make smart meal choices 🍽️    Please choose an option below to get started:\\\\n • 🧾 *About me* \\\\- Learn what I can do   • 💡 *Help* \\\\- How to use this bot   • 🍔 *Recommend food* \\\\- Get a meal suggestion   • 🧠 *Preferences* \\\\- Update your taste settings",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "About me",
+                    "additionalFields": {}
+                  },
+                  {
+                    "text": "Help",
+                    "additionalFields": {}
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Recommend some foods",
+                    "additionalFields": {}
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {},
+        "additionalFields": {
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        336
+      ],
+      "id": "6f5e61a8-114b-4116-8a76-33559ca72d5e",
+      "name": "Send a text message",
+      "webhookId": "63a85e02-ffb7-44ed-8a0e-c16788a93ee5",
+      "credentials": {
+        "telegramApi": {
+          "id": "zP7gihW5lQPpSPOm",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {
+          "maxOutputTokens": 2048,
+          "temperature": 0.6
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        656,
+        176
+      ],
+      "id": "d272d0da-24de-4ca5-a8e1-b73cbe54e23f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wv7mP7xv9FatLqgD",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        176
+      ],
+      "id": "c0c78a49-c004-4c3e-8935-ef091620ba0e",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        944,
+        176
+      ],
+      "id": "675ed977-1087-4f9f-8133-2639fe17c449",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "QrKLaVo2z62cm92z",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        176
+      ],
+      "id": "6a62259a-453a-4f5f-bd73-2067a07ed479",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If not /start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If not /start": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "7bd25827-5f8d-42d2-821f-6d512735beb2",
+  "tags": [
+    {
+      "updatedAt": "2025-11-12T13:48:29.224Z",
+      "createdAt": "2025-11-12T13:48:29.224Z",
+      "id": "To22NZOwJthX72LT",
+      "name": "sync-github"
+    }
+  ]
+}
