@@ -158,14 +158,16 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        576,
-        496
+        592,
+        544
       ],
       "id": "7543e628-0013-4e44-9521-1bdfdd31c547",
       "name": "Sticky Note2"
     },
     {
       "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.commits }}",
         "hasOutputParser": true,
         "options": {
           "systemMessage": "You are an autonomous **Workflow README Synchronization Agent** responsible for keeping the README documentation fully aligned with the workflows inside the workflow directory.\n\n## Responsibilities\n\n1. **Retrieve all workflow files** using `get_all_files_from_workflow_dir`.\n2. **Retrieve the current README.md** using `get_readme`.\n3. **Analyze and compare** workflow entries in the README with the actual workflow files.\n4. Determine if updates are required (missing workflows, outdated descriptions, removed workflows, formatting inconsistencies).\n5. If changes are required, construct a **complete updated README.md** that maintains the following structure:\n\n   * Basic Information\n   * Table of Contents\n   * Introduction\n   * Quick Start (Fork from GitHub → copy workflow JSON → import into n8n)\n   * Workflows Section (workflow list + descriptions + purpose)\n6. Update the repository using `update_readme`.\n7. Only update the README if changes are detected.\n\n## Rules\n\n* Always call `get_all_files_from_workflow_dir` first.\n* Always read the existing README using `get_readme` before modifying anything.\n* Only call `update_readme` when modifications are needed.\n* Output must always be **the full README content**, not a diff.\n* Preserve all unchanged sections.\n* Only the Workflows section is allowed to be modified by default.\n* If any core sections are missing (e.g., Introduction, Quick Start, Basic Information, Table of Contents), the agent is allowed to add them so the README remains complete.\n\n## Workflow Section Structure\n\nEach workflow entry should contain:\n\n* Workflow Title\n* Short Description\n* Purpose / Problem It Solves\n* Optional: Metadata-derived details\n\n## Tool Usage\n\n### `get_all_files_from_workflow_dir`\n\nRetrieve and interpret all workflow files from the workflow directory.\n\n### `get_readme`\n\nRetrieve the current README.md so you can analyze and compare workflow details.\n\n### `update_readme`\n\nSubmit the fully updated README.md when changes are required.\n\n## Output Requirements\n\n* All tool calls must follow correct schema.\n* When returning final output, include a `workflowChanges` property summarizing what was updated.\n* This summary will be used by the email notification workflow.\n\n## README templates description\n```\n# 🚀 Project Title\n\nA brief, one-sentence summary describing what this repository does.\n\n---\n\n## 📌 Table of Contents\n\n* [Introduction](#introduction)\n* [Quick Start](#quick-start)\n* [Workflows](#workflows)\n\n---\n\n## 📖 Introduction\n\nProvide a clear explanation of the purpose of this repository and what problems it solves.\n\nExample:\nThis repository contains a collection of n8n workflows designed to automate common tasks such as notifications, synchronization, file management, and integration with third-party APIs. All workflows are maintained automatically by an AI agent to ensure the README stays aligned with the files inside the workflow directory.\n\n---\n\n## ⚡ Quick Start (Using n8n)\n\n### **1. Fork the Repository**\n\nClick the “Fork” button on GitHub to copy this project into your own workspace.\n\n---\n\n### **2. Import Workflows into n8n**\n\nYou can import workflows into n8n in two ways:\n\n#### **A. Using the workflow JSON files**\n\n1. Open any workflow file inside `/workflows/`\n2. Copy the JSON content\n3. Open n8n → **Import from Clipboard**\n\n#### **B. Using n8n import**\n\n1. In n8n, click **Settings → Import**\n2. Upload any `.json` workflow file from this repository\n\n---\n\n### **3. Configure Environment Variables**\n\nIf workflows require API keys, tokens, or credentials, configure them inside:\n\n```\\ n8n → Settings → Credentials\\ ```\n\n\n---\n\n## 🛠️ Workflows\n\nThis section is automatically generated and maintained by the AI Agent. It contains:\n\n* Workflow Name\n* Short Description\n* Purpose & use-case summary\n\nThe agent compares the current README with the existing workflow files and ensures everything stays updated.\n\n### **Workflow List**\n\n(🔄 *This section is dynamically replaced by the agent*)\n\nExample format the agent must follow:\n\n#### ### Workflow: **email-notification.json**\n\n**Description:** Sends automated email notifications when triggered.\n**Purpose:** Useful for alerting administrators or sending user updates.\n\n#### ### Workflow: **daily-sync.json**\n\n**Description:** Syncs remote data sources every 24 hours.\n**Purpose:** Keeps systems updated without manual intervention.\n\n#### ### Workflow: **user-registration-handler.json**\n\n**Description:** Handles incoming user registration events.\n**Purpose:** Automates onboarding steps such as welcoming messages and account setup.\n\n---\n\n## 🤝 Contributing\n\nContributions are not accepted for this repository.\n\n---\n\n## 📄 License\n\nThis project is licensed under the **Apache License 2.0**.\n```"
@@ -174,22 +176,11 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        608,
-        592
+        848,
+        640
       ],
       "id": "10a22a02-933d-47cc-9a7e-8170a261b4dc",
       "name": "AI Agent"
-    },
-    {
-      "parameters": {},
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        528,
-        960
-      ],
-      "id": "e50bcb6a-6cc9-4eba-96da-636cb67d565d",
-      "name": "Simple Memory"
     },
     {
       "parameters": {
@@ -198,8 +189,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        368,
-        960
+        608,
+        1008
       ],
       "id": "9fdf31a6-2eeb-4261-b0f2-f5d4a3230612",
       "name": "Google Gemini Chat Model",
@@ -231,8 +222,8 @@
       "type": "n8n-nodes-base.githubTool",
       "typeVersion": 1.1,
       "position": [
-        672,
-        960
+        784,
+        1008
       ],
       "id": "537baf0b-74e0-4f7c-bb76-619aa71abbac",
       "name": "List files in GitHub",
@@ -362,8 +353,8 @@
       "type": "n8n-nodes-base.githubTool",
       "typeVersion": 1.1,
       "position": [
-        816,
-        960
+        1088,
+        1008
       ],
       "id": "abe2df03-9f21-487a-a1f5-0b98ae1c5be7",
       "name": "Get README.md",
@@ -398,8 +389,8 @@
       "type": "n8n-nodes-base.githubTool",
       "typeVersion": 1.1,
       "position": [
-        976,
-        960
+        1216,
+        1008
       ],
       "id": "fc007636-bd39-4ae9-8272-02b48858cb14",
       "name": "Udpate README.md",
@@ -413,14 +404,14 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"updatedReadme\": \"<full new readme markdown here>\",\n  \"workflowChanges\": \"- Added new workflow: auto-sync.json\\n- Updated description: notify-user.json\\n- Removed deprecated: old-cleanup.json\"\n}\n",
+        "jsonSchemaExample": "{\n  \"updatedReadme\": \"<full new readme markdown here>\",\n  \"workflowChanges\": \"- Added new workflow: auto-sync.json\\n- Updated description: notify-user.json\\n- Removed deprecated: old-cleanup.json\",\n\"getWorkflow\": \"<file name>.json\"\n}\n",
         "autoFix": true
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1136,
-        960
+        1376,
+        1008
       ],
       "id": "5c232169-dff2-42a0-a78f-6bc936382d3b",
       "name": "Structured Output Parser"
@@ -436,8 +427,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        928,
-        592
+        1168,
+        640
       ],
       "id": "20b5beae-23aa-41e5-aea5-a8ee0c1c6ca1",
       "name": "Send email",
@@ -497,6 +488,64 @@
       ],
       "id": "5aa904f2-495d-4dc1-b7c8-6e9d42af4c5e",
       "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "commit.message",
+              "renameField": true,
+              "outputFieldName": "commits"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        656,
+        640
+      ],
+      "id": "ab5409b3-4cee-4a7d-9e8d-257cbce72419",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/Cstan0824",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_workflows",
+          "mode": "list",
+          "cachedResultName": "n8n_workflows",
+          "cachedResultUrl": "https://github.com/Cstan0824/n8n_workflows"
+        },
+        "filePath": "=workflows/{{$json.fileName}}.json",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.githubTool",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        1008
+      ],
+      "id": "949b1c41-96c7-4616-bb24-03176118ebbe",
+      "name": "Get a file in GitHub",
+      "webhookId": "b1df188b-d74d-45c5-9c56-9ac3d9c29ea7",
+      "credentials": {
+        "githubApi": {
+          "id": "POURyRuASam0kau7",
+          "name": "GitHub account"
+        }
+      }
     }
   ],
   "connections": {
@@ -526,7 +575,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Aggregate",
             "type": "main",
             "index": 0
           }
@@ -537,19 +586,8 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Aggregate",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_memory",
             "index": 0
           }
         ]
@@ -688,6 +726,28 @@
           }
         ]
       ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file in GitHub": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -697,7 +757,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b21d79a3-0124-497b-a357-948deaae6461",
+  "versionId": "253aca54-d096-40ea-9216-354b3b2230db",
   "tags": [
     {
       "updatedAt": "2025-11-12T13:48:29.224Z",
