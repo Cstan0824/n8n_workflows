@@ -31,7 +31,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        304,
+        320,
         192
       ],
       "id": "35ac4d75-5512-4dac-87d4-2a8a7ad4ae42",
@@ -697,7 +697,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2dbacc5c-ffa2-4fb5-98ae-2abc2875a1c0",
+  "versionId": "b21d79a3-0124-497b-a357-948deaae6461",
   "tags": [
     {
       "updatedAt": "2025-11-12T13:48:29.224Z",
