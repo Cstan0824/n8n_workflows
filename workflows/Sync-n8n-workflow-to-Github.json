@@ -153,7 +153,7 @@
       "parameters": {
         "content": "## Update README.md\n",
         "height": 304,
-        "width": 592
+        "width": 720
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -170,7 +170,7 @@
         "text": "={{ $json.commits }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are an autonomous **Workflow README Synchronization Agent** responsible for keeping the README documentation fully aligned with the workflows inside the workflow directory.\n\n## Responsibilities\n\n1. **Retrieve all workflow files** using `get_all_files_from_workflow_dir`.\n2. **Retrieve the current README.md** using `get_readme`.\n3. **Analyze and compare** workflow entries in the README with the actual workflow files.\n4. Determine if updates are required (missing workflows, outdated descriptions, removed workflows, formatting inconsistencies).\n5. If changes are required, construct a **complete updated README.md** that maintains the following structure:\n\n   * Basic Information\n   * Table of Contents\n   * Introduction\n   * Quick Start (Fork from GitHub → copy workflow JSON → import into n8n)\n   * Workflows Section (workflow list + descriptions + purpose)\n6. Update the repository using `update_readme`.\n7. Only update the README if changes are detected.\n\n## Rules\n\n* Always call `get_all_files_from_workflow_dir` first.\n* Always read the existing README using `get_readme` before modifying anything.\n* Only call `update_readme` when modifications are needed.\n* Output must always be **the full README content**, not a diff.\n* Preserve all unchanged sections.\n* Only the Workflows section is allowed to be modified by default.\n* If any core sections are missing (e.g., Introduction, Quick Start, Basic Information, Table of Contents), the agent is allowed to add them so the README remains complete.\n\n## Workflow Section Structure\n\nEach workflow entry should contain:\n\n* Workflow Title\n* Short Description\n* Purpose / Problem It Solves\n* Optional: Metadata-derived details\n\n## Tool Usage\n\n### `get_all_files_from_workflow_dir`\n\nRetrieve and interpret all workflow files from the workflow directory.\n\n### `get_readme`\n\nRetrieve the current README.md so you can analyze and compare workflow details.\n\n### `update_readme`\n\nSubmit the fully updated README.md when changes are required.\n\n## Output Requirements\n\n* All tool calls must follow correct schema.\n* When returning final output, include a `workflowChanges` property summarizing what was updated.\n* This summary will be used by the email notification workflow.\n\n## README templates description\n```\n# 🚀 Project Title\n\nA brief, one-sentence summary describing what this repository does.\n\n---\n\n## 📌 Table of Contents\n\n* [Introduction](#introduction)\n* [Quick Start](#quick-start)\n* [Workflows](#workflows)\n\n---\n\n## 📖 Introduction\n\nProvide a clear explanation of the purpose of this repository and what problems it solves.\n\nExample:\nThis repository contains a collection of n8n workflows designed to automate common tasks such as notifications, synchronization, file management, and integration with third-party APIs. All workflows are maintained automatically by an AI agent to ensure the README stays aligned with the files inside the workflow directory.\n\n---\n\n## ⚡ Quick Start (Using n8n)\n\n### **1. Fork the Repository**\n\nClick the “Fork” button on GitHub to copy this project into your own workspace.\n\n---\n\n### **2. Import Workflows into n8n**\n\nYou can import workflows into n8n in two ways:\n\n#### **A. Using the workflow JSON files**\n\n1. Open any workflow file inside `/workflows/`\n2. Copy the JSON content\n3. Open n8n → **Import from Clipboard**\n\n#### **B. Using n8n import**\n\n1. In n8n, click **Settings → Import**\n2. Upload any `.json` workflow file from this repository\n\n---\n\n### **3. Configure Environment Variables**\n\nIf workflows require API keys, tokens, or credentials, configure them inside:\n\n```\\ n8n → Settings → Credentials\\ ```\n\n\n---\n\n## 🛠️ Workflows\n\nThis section is automatically generated and maintained by the AI Agent. It contains:\n\n* Workflow Name\n* Short Description\n* Purpose & use-case summary\n\nThe agent compares the current README with the existing workflow files and ensures everything stays updated.\n\n### **Workflow List**\n\n(🔄 *This section is dynamically replaced by the agent*)\n\nExample format the agent must follow:\n\n#### ### Workflow: **email-notification.json**\n\n**Description:** Sends automated email notifications when triggered.\n**Purpose:** Useful for alerting administrators or sending user updates.\n\n#### ### Workflow: **daily-sync.json**\n\n**Description:** Syncs remote data sources every 24 hours.\n**Purpose:** Keeps systems updated without manual intervention.\n\n#### ### Workflow: **user-registration-handler.json**\n\n**Description:** Handles incoming user registration events.\n**Purpose:** Automates onboarding steps such as welcoming messages and account setup.\n\n---\n\n## 🤝 Contributing\n\nContributions are not accepted for this repository.\n\n---\n\n## 📄 License\n\nThis project is licensed under the **Apache License 2.0**.\n```"
+          "systemMessage": "\n\nYou are an autonomous **Workflow README Synchronization Agent** responsible for keeping the README documentation fully aligned with workflow files. You operate based exclusively on **commit payload changes**, not directory-wide scanning.\n\n---\n\n## Responsibilities\n\n\n1. Extract workflow filenames from commit messages following the format: \n\n   ```\n   Update workflow file at workflows/<workflow_name>.json\n   ```\n\n   You must extract `<workflow_name>.json` and use it as `getWorkflow`.\n2. For each workflow in `changedWorkflows`, call `get_file` to retrieve its JSON content. \n3. Call `get_readme` to retrieve the current README.md. \n4. Update only the **Workflows section** based on: \n\n   * Added workflows\n   * Modified workflows\n   * Removed workflows\n5. If any **core README sections** are missing (Introduction, Quick Start, Basic Information, Table of Contents, License), you may add them. \n6. Produce a full rewritten README.md only if changes are required. \n7. Submit the updated README using `update_readme`. \n\n---\n\n## Rules\n\n* **Never call `update_readme` until all reasoning is fully complete.** You must think through the entire update process, gather all necessary information, and finalize the rewritten README before performing the `update_readme` tool call. The tool call must only occur *after* your reasoning has ended and must not interrupt your analytical steps.\n* **You must never perform early tool calls.** All reasoning, comparison, validation, and README construction must be completed before invoking any update action.\n* **Do NOT scan the entire workflow directory.** Only use workflow files explicitly provided via commit payload or commit message parsing.\n* Only modify the **Workflows section**, unless a core section is missing, in which case you may add it.\n* Always preserve existing content outside the Workflows section.\n* If the Workflows section does not exist, you must generate one based on the available workflow files.\n* Always output a **complete README**, not a diff.\n* Generate a `workflowChanges` summary describing all updates.\n* Extract `getWorkflow` from commit messages and include it in your final output.\n\n---\n\n## Commit Message Parsing\n\nCommit messages follow this structure:\n\n```\nUpdate workflow file at workflows/<workflow_name>.json\n```\n\nYou must:\n\n* Extract `<workflow_name>.json`\n* Use it to identify the workflow being updated\n* Use it in your final JSON response under `getWorkflow`\n* Use it in your `get_file` calls\n\nExample:\nCommit message:\n\n```\nUpdate workflow file at workflows/email-notification.json\n```\n\nExtract:\n\n```\ngetWorkflow = \"email-notification.json\"\n```\n\nThen call:\n\n```json\n{\n  \"tool\": \"get_file\",\n  \"getWorkflow\": \"email-notification.json\"\n}\n```\n\n---\n\n## Workflow Section Structure\n\nEach workflow entry must contain:\n\n* Workflow Title\n* Description\n* Purpose / Problem It Solves\n* Metadata (if available)\n\n---\n\n## Tool Usage\n\n### `get_file`\n\nFetches the content of a workflow JSON file by its GitHub path.\n**Input → Output:**\n\n```\n({ path: string }) → ({ path: string, content: string })\n```\n\n### `get_readme`\n\nRetrieves the current README.md.\n**Input → Output:**\n\n```\n({}) → ({ content: string })\n```\n\n### `update_readme`\n\nWrites the updated README.md content back into the repository.\n**Input → Output:**\n\n```\n({ content: string }) → ({ success: boolean })\n```\n\n---\n\n## Output Requirements\n\nYour final output must be structured as:\n\n```\n{\n  \"updatedReadme\": \"<full markdown>\",\n  \"workflowChanges\": \"<summary of updates>\",\n  \"getWorkflow\": \"<workflow filename>.json\"\n}\n```\n\nWhere:\n\n* **updatedReadme** → Fully rewritten README\n* **workflowChanges** → Human-readable summary (added, modified, removed workflows)\n* **getWorkflow** → Extracted workflow filename from commit message\n\nThis output is consumed downstream (email notification).\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -198,40 +198,6 @@
         "googlePalmApi": {
           "id": "wv7mP7xv9FatLqgD",
           "name": "Google Gemini(PaLM) Api account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "file",
-        "operation": "list",
-        "owner": {
-          "__rl": true,
-          "value": "https://github.com/Cstan0824",
-          "mode": "url"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "n8n_workflows",
-          "mode": "list",
-          "cachedResultName": "n8n_workflows",
-          "cachedResultUrl": "https://github.com/Cstan0824/n8n_workflows"
-        },
-        "filePath": "workflows/"
-      },
-      "type": "n8n-nodes-base.githubTool",
-      "typeVersion": 1.1,
-      "position": [
-        784,
-        1008
-      ],
-      "id": "537baf0b-74e0-4f7c-bb76-619aa71abbac",
-      "name": "List files in GitHub",
-      "webhookId": "45de1ae5-0b49-4716-81a3-e1612194374b",
-      "credentials": {
-        "githubApi": {
-          "id": "POURyRuASam0kau7",
-          "name": "GitHub account"
         }
       }
     },
@@ -353,7 +319,7 @@
       "type": "n8n-nodes-base.githubTool",
       "typeVersion": 1.1,
       "position": [
-        1088,
+        1008,
         1008
       ],
       "id": "abe2df03-9f21-487a-a1f5-0b98ae1c5be7",
@@ -389,7 +355,7 @@
       "type": "n8n-nodes-base.githubTool",
       "typeVersion": 1.1,
       "position": [
-        1216,
+        1184,
         1008
       ],
       "id": "fc007636-bd39-4ae9-8272-02b48858cb14",
@@ -404,7 +370,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"updatedReadme\": \"<full new readme markdown here>\",\n  \"workflowChanges\": \"- Added new workflow: auto-sync.json\\n- Updated description: notify-user.json\\n- Removed deprecated: old-cleanup.json\",\n\"getWorkflow\": \"<file name>.json\"\n}\n",
+        "jsonSchemaExample": "{\n  \"updatedReadme\": \"<full new readme markdown here>\",\n  \"workflowChanges\": \"- Sync-n8n-workflow-to-Github.json: Updated trigger logic and improved file sync steps.\\n- Food-Decider.json: Refined decision rules and enhanced recommendation flow.\\n- Demo-RAG-Workflow.json: Updated embeddings retrieval and improved message handling.\",\n\"getWorkflow\": \"<file name>.json\"\n}\n",
         "autoFix": true
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
@@ -421,7 +387,7 @@
         "fromEmail": "academystudy.noreply@gmail.com",
         "toEmail": "tancs8803@gmail.com",
         "subject": "Workflow Updated at Github",
-        "html": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Workflow & README Sync Completed</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; background-color: #f6f6f6; padding: 20px;\">\n  <div style=\"max-width: 600px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #ddd;\">\n    \n    <h2 style=\"color: #333333; margin-top: 0;\">🔄 Workflow Synchronization Completed</h2>\n\n    <p style=\"font-size: 15px; color: #444444;\">\n      Hello,\n    </p>\n\n    <p style=\"font-size: 15px; color: #444444;\">\n      Your repository has been successfully synchronized. The agent compared all workflow files with the\n      existing <strong>README.md</strong> and updated the documentation accordingly.\n    </p>\n\n    <h3 style=\"color: #333333;\">📘 What Has Been Updated</h3>\n\n    <p style=\"font-size: 15px; color: #444444;\">\n      Below is a summary of changes detected during the synchronization:\n    </p>\n\n    <div style=\"font-size: 14px; color: #444444; background: #f0f0f0; padding: 12px; border-radius: 6px; border-left: 4px solid #4a90e2;\">\n      {{ $json.workflowChanges }}\n    </div>\n\n    <p style=\"font-size: 15px; color: #444444; margin-top: 20px;\">\n      You may review the updated README.md directly in your repository for the full details.\n    </p>\n\n    <p style=\"font-size: 14px; margin-top: 30px; color: #777;\">\n      This message was automatically generated by your Workflow README Sync Agent.\n    </p>\n\n  </div>\n</body>\n</html>\n",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Workflow & README Sync Completed</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; background-color: #f6f6f6; padding: 20px;\">\n  <div style=\"max-width: 600px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #ddd;\">\n    \n    <h2 style=\"color: #333333; margin-top: 0;\">🔄 Workflow Synchronization Completed</h2>\n\n    <p style=\"font-size: 15px; color: #444444;\">\n      Hello,\n    </p>\n\n    <p style=\"font-size: 15px; color: #444444;\">\n      Your repository has been successfully synchronized. The agent compared all workflow files with the\n      existing <strong>README.md</strong> and updated the documentation accordingly.\n    </p>\n\n    <h3 style=\"color: #333333;\">📘 What Has Been Updated</h3>\n\n    <p style=\"font-size: 15px; color: #444444;\">\n      Below is a summary of changes detected during the synchronization:\n    </p>\n\n    <div style=\"font-size: 14px; color: #444444; background: #f0f0f0; padding: 12px; border-radius: 6px; border-left: 4px solid #4a90e2;\">\n     {{ $json.output.workflowChanges }}\n    </div>\n\n    <p style=\"font-size: 15px; color: #444444; margin-top: 20px;\">\n      You may review the updated README.md directly in your repository for the full details.\n    </p>\n\n    <p style=\"font-size: 14px; margin-top: 30px; color: #777;\">\n      This message was automatically generated by your Workflow README Sync Agent.\n    </p>\n\n  </div>\n</body>\n</html>\n",
         "options": {}
       },
       "type": "n8n-nodes-base.emailSend",
@@ -527,14 +493,14 @@
           "cachedResultName": "n8n_workflows",
           "cachedResultUrl": "https://github.com/Cstan0824/n8n_workflows"
         },
-        "filePath": "=workflows/{{$json.fileName}}.json",
+        "filePath": "=workflows/{{$json.getWorkflow}}",
         "asBinaryProperty": false,
         "additionalParameters": {}
       },
       "type": "n8n-nodes-base.githubTool",
       "typeVersion": 1.1,
       "position": [
-        944,
+        832,
         1008
       ],
       "id": "949b1c41-96c7-4616-bb24-03176118ebbe",
@@ -604,17 +570,6 @@
           {
             "node": "Structured Output Parser",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "List files in GitHub": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -757,7 +712,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "253aca54-d096-40ea-9216-354b3b2230db",
+  "versionId": "ddb31a51-d80f-4623-a7af-4de8908bf724",
   "tags": [
     {
       "updatedAt": "2025-11-12T13:48:29.224Z",
