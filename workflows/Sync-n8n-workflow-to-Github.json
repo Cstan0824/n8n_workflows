@@ -4,17 +4,6 @@
   "active": false,
   "nodes": [
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        64,
-        32
-      ],
-      "id": "04e693a4-8400-4ebe-8599-53b0a2796bd2",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
       "parameters": {
         "rule": {
           "interval": [
@@ -29,7 +18,7 @@
       "typeVersion": 1.2,
       "position": [
         64,
-        192
+        208
       ],
       "id": "c531fd17-270f-4eea-9d22-a9895eb4f61a",
       "name": "Schedule Trigger"
@@ -497,20 +486,20 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        64,
+        48
+      ],
+      "id": "5aa904f2-495d-4dc1-b7c8-6e9d42af4c5e",
+      "name": "When clicking ‘Execute workflow’"
     }
   ],
   "connections": {
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Get many workflows",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Schedule Trigger": {
       "main": [
         [
@@ -688,6 +677,17 @@
         ],
         []
       ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -697,7 +697,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0a188bdc-0373-48ce-a073-4ca8bec7c6db",
+  "versionId": "2dbacc5c-ffa2-4fb5-98ae-2abc2875a1c0",
   "tags": [
     {
       "updatedAt": "2025-11-12T13:48:29.224Z",
